@@ -134,12 +134,12 @@ def command_status(set_number: int | None = None) -> int:
 @app.command(name="problems")
 def command_problems() -> int:
     """List hard-coded CS201 APT mappings."""
-    print(f"{'GROUP':25} {'CLASS':24} {'DETAILS':40}  SLUG")
+    print(f"{'GROUP':25} {'CLASS':24} {'SLUG':40}  DETAILS")
     for problem in CATALOG:
         print(
             f"{problem.group_id:25} "
             f"{problem.class_name:24} "
-            f"{problem.details:40}  {problem.slug}"
+            f"{problem.slug:20}  {problem.details}"
         )
     return 0
 

@@ -80,10 +80,10 @@ def test_problems_uses_fixed_width_columns(capsys) -> None:
     lines = capsys.readouterr().out.splitlines()
     assert (
         lines[0]
-        == "GROUP                     CLASS                    DETAILS                                   SLUG"
+        == "GROUP                     CLASS                    SLUG                                      DETAILS"
     )
     assert lines[1].startswith("set1                      Totality")
-    assert lines[1].endswith("totality")
+    assert "totality" in lines[1]
 
 
 def test_problems_identifies_practice_group_and_details(capsys) -> None:
