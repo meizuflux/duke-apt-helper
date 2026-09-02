@@ -94,3 +94,8 @@ def test_problems_identifies_practice_group_and_details(capsys) -> None:
     assert "practice/quiz1" not in output
     assert "EndOfWords" in output
     assert "level 1" in output
+
+
+def test_unknown_command_returns_usage_error(capsys) -> None:
+    assert main(["statsu"]) == 2
+    assert "Unknown command" in capsys.readouterr().err
