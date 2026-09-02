@@ -1,0 +1,55 @@
+[project]
+name = "apt-helper"
+version = "0.1.0"
+description = "Check and submit Duke CS201 APT solutions from the command line"
+readme = "README.md"
+authors = [
+    { name = "meizuflux", email = "76911441+meizuflux@users.noreply.github.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "beautifulsoup4>=4.12.3",
+    "requests>=2.32.3",
+]
+
+[dependency-groups]
+dev = [
+    "basedpyright>=1.31",
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "ruff>=0.12",
+]
+
+[project.scripts]
+dapt = "apt_helper:main"
+
+[build-system]
+requires = ["uv_build>=0.12.7,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.basedpyright]
+include = ["src"]
+pythonVersion = "3.14"
+typeCheckingMode = "basic"
+reportImplicitStringConcatenation = false
+reportUnusedCallResult = false
+
+[tool.pytest.ini_options]
+addopts = ["--strict-config", "--strict-markers"]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["apt_helper"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+
+[tool.ruff]
+line-length = 88
+target-version = "py314"
+
+[tool.ruff.lint]
+ignore = ["E501"]
+select = ["B", "E", "F", "I", "SIM", "UP"]

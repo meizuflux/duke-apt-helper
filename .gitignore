@@ -1,0 +1,25 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Test, type-checker, and linter caches
+.coverage
+.pytest_cache/
+.ruff_cache/
+.basedpyright/
+htmlcov/
+
+# Local application state
+*.db
+*.db-shm
+*.db-wal
+
+# macOS
+.DS_Store
