@@ -1,8 +1,8 @@
 from typing import cast
 
+import niquests
 import pytest
-import requests
-from requests import Response
+from niquests import Response
 
 from apt_helper.client import AptClient
 from apt_helper.utils import AptError
@@ -22,7 +22,7 @@ def test_submission_page_reports_redirected_expired_session() -> None:
     response.url = "https://shib.oit.duke.edu/idp/profile/SAML2/Redirect/SSO"
     response._content = b"sign in"
     client = AptClient("session=old")
-    client.session = cast(requests.Session, FakeSession(response))
+    client.session = cast(niquests.Session, FakeSession(response))
 
     with pytest.raises(AptError, match="session expired"):
         client.submission_page()
@@ -34,6 +34,6 @@ def test_submission_page_accepts_apt_results_page() -> None:
     response.url = "https://apt.cs.duke.edu/aptsec/checksub201.php"
     response._content = b"<title>APT Submissions</title>"
     client = AptClient("session=valid")
-    client.session = cast(requests.Session, FakeSession(response))
+    client.session = cast(niquests.Session, FakeSession(response))
 
     client.submission_page()

@@ -1,10 +1,11 @@
 """HTTP client for Duke APT."""
 
 from pathlib import Path
-from typing import BinaryIO, NotRequired, TypedDict, Unpack
+from typing import NotRequired, TypedDict, Unpack
 from urllib.parse import urlsplit
 
-import requests
+import niquests
+from niquests.typing import MultiPartFilesAltType
 
 from .utils import AptError
 
@@ -17,12 +18,12 @@ class RequestOptions(TypedDict):
     """The request options used by this client."""
 
     data: NotRequired[dict[str, str]]
-    files: NotRequired[dict[str, tuple[str, BinaryIO, str]]]
+    files: NotRequired[MultiPartFilesAltType]
 
 
 class AptClient:
     def __init__(self, cookie: str) -> None:
-        self.session: requests.Session = requests.Session()
+        self.session: niquests.Session = niquests.Session()
         self.session.headers.update(
             {
                 "Cookie": cookie,
@@ -32,20 +33,20 @@ class AptClient:
 
     def _request(
         self, method: str, url: str, **kwargs: Unpack[RequestOptions]
-    ) -> requests.Response:
+    ) -> niquests.Response:
         try:
             response = self.session.request(method, url, timeout=30, **kwargs)
             response.raise_for_status()
-        except requests.RequestException as exc:
+        except niquests.RequestException as exc:
             raise AptError(f"Could not reach APT: {exc}") from exc
-        if urlsplit(response.url).hostname != "apt.cs.duke.edu":
+        if response.url is None or urlsplit(response.url).hostname != "apt.cs.duke.edu":
             raise AptError(
                 "Duke session expired. Run `dapt auth` and paste a fresh Cookie header."
             )
         return response
 
     def submission_page(self) -> str:
-        page = self._request("GET", CHECK_URL).text
+        page = self._request("GET", CHECK_URL).text or ""
         if "APT Submissions" not in page:
             raise AptError(
                 "Duke session expired or APT returned an unexpected results page. Run `dapt auth` with updated credentials."
@@ -59,4 +60,4 @@ class AptClient:
                 UPLOAD_URL,
                 data={"course": "compsci201", "language": "java", "problem": problem},
                 files={"upfile": (file_path.name, upload, "application/octet-stream")},
-            ).text
+            ).text or ""
