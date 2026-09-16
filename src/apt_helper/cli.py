@@ -71,7 +71,7 @@ def command_auth() -> int:
             normalise_cookie(getpass.getpass("Cookie (input hidden): "))
         )
         print(f"Saved in local database with owner-only permissions: {database.path}")
-    return 0
+    return command_sync()
 
 
 @app.command(name="sync")
