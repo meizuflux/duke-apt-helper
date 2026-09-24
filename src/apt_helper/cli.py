@@ -6,10 +6,9 @@ import getpass
 import subprocess
 import sys
 from pathlib import Path
-from typing import Annotated, Literal
+from typing import Literal
 
 import cyclopts
-from cyclopts import Parameter
 
 from .catalog import CATALOG, AptProblem, find_apt_name
 from .client import AptClient
@@ -161,13 +160,7 @@ def command_run(apt_name: str) -> int:
 
 
 @app.command(name="submit")
-def command_submit(
-    apt_name: str,
-    yes: Annotated[
-        bool,
-        Parameter(alias="-y", help="Skip the confirmation prompt."),
-    ] = False,
-) -> int:
+def command_submit(apt_name: str) -> int:
     """Upload an APT by its visible class name.
 
     Parameters
@@ -177,11 +170,6 @@ def command_submit(
     """
     catalog_problem, file_path = resolve_source(apt_name)
     with Database() as database:
-        if not yes and input(
-            f"Submit {file_path.name} for {catalog_problem.catalog_id}? [y/N] "
-        ).strip().lower() not in {"y", "yes"}:
-            print("Submission cancelled.")
-            return 0
         client = AptClient(load_cookie(database))
         result = parse_upload_result(
             client.submit(

@@ -25,7 +25,8 @@ dapt auth
 When prompted, paste the `Cookie` request-header value from an authenticated
 `apt.cs.duke.edu` request in your browser's developer tools. The cookie is
 stored locally in `~/.local/state/dapt/dapt.db`; treat it as a login
-credential. Run `dapt auth` again when it expires.
+credential. Authentication immediately syncs submission results to verify the
+new session. Run `dapt auth` again when it expires.
 
 ## Usage
 
@@ -35,8 +36,7 @@ dapt sync                            # fetch and cache latest submission results
 dapt status                          # show cached results and file status
 dapt status 1                        # show one APT set
 dapt run gravity                    # run the expected Java file locally
-dapt submit gravity                 # upload an APT (asks for confirmation)
-dapt submit gravity --yes           # upload without confirmation
+dapt submit gravity                 # upload an APT
 ```
 
 Run `dapt problems` to see valid APT names and details; names and class names are

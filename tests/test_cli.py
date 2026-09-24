@@ -6,6 +6,66 @@ import apt_helper.database as database_module
 from apt_helper.cli import main
 from apt_helper.database import Database
 from apt_helper.models import Submission
+from apt_helper.utils import AptError
+
+SUBMISSIONS_PAGE = """
+<title>APT Submissions</title>
+<table>
+  <tr><th>problem</th></tr>
+  <tr><td>gravity</td><td>100</td><td>10</td><td>server time</td></tr>
+</table>
+"""
+
+
+def test_auth_saves_cookie_and_syncs_submissions(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    database_path = tmp_path / "apt.db"
+    monkeypatch.setattr(database_module, "DEFAULT_DATABASE", database_path)
+    monkeypatch.setattr(cli.getpass, "getpass", lambda _: "session=fresh")
+
+    class FakeAptClient:
+        def __init__(self, cookie: str) -> None:
+            assert cookie == "session=fresh"
+
+        def submission_page(self) -> str:
+            return SUBMISSIONS_PAGE
+
+    monkeypatch.setattr(cli, "AptClient", FakeAptClient)
+
+    assert main(["auth"]) == 0
+    output = capsys.readouterr().out
+    with Database(database_path) as database:
+        assert database.cookie() == "session=fresh"
+        assert database.latest_submissions() == [
+            Submission("gravity", "100", "10", "server time")
+        ]
+        assert database.last_synced_at() is not None
+    assert "gravity" in output
+
+
+def test_auth_keeps_new_cookie_when_sync_verification_fails(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    database_path = tmp_path / "apt.db"
+    with Database(database_path) as database:
+        database.save_cookie("session=old")
+    monkeypatch.setattr(database_module, "DEFAULT_DATABASE", database_path)
+    monkeypatch.setattr(cli.getpass, "getpass", lambda _: "session=invalid")
+
+    class RejectingAptClient:
+        def __init__(self, cookie: str) -> None:
+            assert cookie == "session=invalid"
+
+        def submission_page(self) -> str:
+            raise AptError("Duke session expired")
+
+    monkeypatch.setattr(cli, "AptClient", RejectingAptClient)
+
+    assert main(["auth"]) == 1
+    assert "session expired" in capsys.readouterr().err
+    with Database(database_path) as database:
+        assert database.cookie() == "session=invalid"
 
 
 def test_status_reads_local_database_without_a_cookie(
